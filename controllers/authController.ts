@@ -25,3 +25,23 @@ export const registerUser = async (req:any, res:any) => {
         res.status(500).json({message: "Server error"})
     }
 };
+
+const loginUser = async (req:any, res:any) => {
+
+    const {number, password} = req.body;
+    try{
+        const user = await User.findOne({number});
+        if(!user) return res.status(400).json({status: "Failed", message: "User not found"});
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(!isMatch) return res.status(400).json({status: "Failed", message: "Wrong password"});
+
+        res.json({
+            "status": "Success",
+            "message": "Logged in successfully",
+            token: await generateToken(user.id),
+        })
+    } catch(err:any){
+        res.status(500).json({message: "Server error"});
+    }
+}
