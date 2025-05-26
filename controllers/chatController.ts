@@ -1,7 +1,7 @@
 import Message from "../models/Message";
 import User from "../models/User";
 
-export const getMessage = async (req:any, res:any) => {
+export const getMessages = async (req:any, res:any) => {
     try{
         const {user_id} = req.params;
         const currentUserId = req.user._id;
@@ -19,7 +19,7 @@ export const getMessage = async (req:any, res:any) => {
     }
 }
 
-export const getUser = async (req:any, res:any) =>{
+export const getUsers = async (req:any, res:any) =>{
     try{
         const users = await User.find({_id: {$ne: req.user._id}}).select('-password');
         res.json(users);
