@@ -17,14 +17,17 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const User_1 = __importDefault(require("../models/User"));
 const jwt_1 = require("../utils/jwt");
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("request: ", req);
+    console.log("➡️ Register request received:", req.body);
     try {
         const { name, number, username, email, password } = req.body;
         const userExists = yield User_1.default.findOne({ number });
-        if (userExists)
+        if (userExists) {
+            console.log("❌ User already exists with number:", number);
             return res.status(400).json({ status: "Failed", message: "This number already used" });
+        }
         const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
         const user = yield User_1.default.create({ name, number, username, email, password: hashedPassword });
+        console.log("✅ New user registered:", user);
         res.status(201).json({
             _id: user.id,
             name: user.name,
@@ -35,26 +38,34 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         });
     }
     catch (err) {
+        console.error("❌ Registration error:", err);
         res.status(500).json({ message: "Server error" });
     }
 });
 exports.registerUser = registerUser;
 const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("➡️ Login request received:", req.body);
     const { number, password } = req.body;
     try {
         const user = yield User_1.default.findOne({ number });
-        if (!user)
+        if (!user) {
+            console.log("❌ User not found for number:", number);
             return res.status(400).json({ status: "Failed", message: "User not found" });
+        }
         const isMatch = yield bcryptjs_1.default.compare(password, user.password);
-        if (!isMatch)
+        if (!isMatch) {
+            console.log("❌ Incorrect password for number:", number);
             return res.status(400).json({ status: "Failed", message: "Wrong password" });
+        }
+        console.log("✅ Login successful for user:", user.username);
         res.json({
-            "status": "Success",
-            "message": "Logged in successfully",
-            token: yield (0, jwt_1.generateToken)(user.id),
+            status: "Success",
+            message: "Logged in successfully",
+            token: (0, jwt_1.generateToken)(user.id),
         });
     }
     catch (err) {
+        console.error("❌ Login error:", err);
         res.status(500).json({ message: "Server error" });
     }
 });
