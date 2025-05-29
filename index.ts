@@ -1,14 +1,14 @@
 import errorHandler from "./utils/errorHandler";
-
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+import dotenv from "dotenv";
 const cors = require('cors');
 const http = require('http');
 const socketio = require('socket.io');
 import authRoutes from "./routes/authRoutes";
 import chatRoutes from "./routes/chatRoutes";
 
+dotenv.config()
 const app = express();
 const server = http.createServer(app)
 
