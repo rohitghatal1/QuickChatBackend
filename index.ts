@@ -7,6 +7,7 @@ const http = require('http');
 const socketio = require('socket.io');
 import authRoutes from "./routes/authRoutes";
 import chatRoutes from "./routes/chatRoutes";
+import userRoutes from "./routes/userRoutes";
 
 dotenv.config()
 const app = express();
@@ -25,6 +26,7 @@ app.get("/", (req:any, res:any) => {
 });
 app.use('/api/auth', authRoutes)
 app.use('/api/chat', chatRoutes)
+app.use('/api/users/', userRoutes)
 
 const io = socketio(server, {
     cors: {

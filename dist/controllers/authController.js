@@ -59,8 +59,11 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         console.log("✅ Login successful for user:", user.username);
         res.json({
-            status: "Success",
-            message: "Logged in successfully",
+            _id: user.id,
+            name: user.name,
+            username: user.username,
+            number: user.number,
+            email: user.email,
             token: (0, jwt_1.generateToken)(user.id),
         });
     }

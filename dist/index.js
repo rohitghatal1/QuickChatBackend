@@ -4,14 +4,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const errorHandler_1 = __importDefault(require("./utils/errorHandler"));
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const dotenv_1 = __importDefault(require("dotenv"));
 const cors = require('cors');
 const http = require('http');
 const socketio = require('socket.io');
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const chatRoutes_1 = __importDefault(require("./routes/chatRoutes"));
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+dotenv_1.default.config();
 const app = express();
 const server = http.createServer(app);
 //middleware
@@ -25,6 +27,7 @@ app.get("/", (req, res) => {
 });
 app.use('/api/auth', authRoutes_1.default);
 app.use('/api/chat', chatRoutes_1.default);
+app.use('/api/users/', userRoutes_1.default);
 const io = socketio(server, {
     cors: {
         origin: "*",
