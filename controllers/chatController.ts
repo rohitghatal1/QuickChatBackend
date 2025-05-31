@@ -11,7 +11,7 @@ export const getMessages = async (req:any, res:any) => {
                 {sender: currentUserId, receiver: user_id},
                 {sender: user_id, receiver: currentUserId},
             ],
-        }).sort('timestamp');
+        }).sort('timestamp').populate('sender receiver', 'username');
 
         res.json(message);
     } catch(err:any){
