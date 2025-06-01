@@ -17,15 +17,16 @@ const Message_1 = __importDefault(require("../models/Message"));
 const User_1 = __importDefault(require("../models/User"));
 const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { user_id } = req.params;
-        const currentUserId = req.user._id;
-        const message = yield Message_1.default.find({
+        const { userId } = req.params;
+        const currentUserId = req.user.id;
+        console.log("user id: ", req.user);
+        const messages = yield Message_1.default.find({
             $or: [
-                { sender: currentUserId, receiver: user_id },
-                { sender: user_id, receiver: currentUserId },
-            ],
-        }).sort('timestamp');
-        res.json(message);
+                { sender: currentUserId, receiver: userId },
+                { sender: userId, receiver: currentUserId }
+            ]
+        }).sort('timestamp').populate('sender receiver', 'username');
+        res.json(messages);
     }
     catch (err) {
         res.status(500).json({ message: err.message });

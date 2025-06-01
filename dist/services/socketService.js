@@ -13,32 +13,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Message_1 = __importDefault(require("../models/Message"));
-module.exports = (io) => {
+exports.default = (io) => {
     io.on('connection', (socket) => {
         console.log('New client connected');
-        socket.on('joinCoversation', ({ userId }) => {
+        socket.on('joinConversation', ({ userId }) => {
+            if (!userId) {
+                console.error('No userId provided');
+                return;
+            }
             socket.join(userId);
+            socket.userId = userId;
             console.log(`User ${userId} joined their room`);
         });
-        socket.on('sendMessage', (_a) => __awaiter(void 0, [_a], void 0, function* ({ senderId, receiverId, content }) {
+        socket.on('sendMessage', (senderId, receiverId, content) => __awaiter(void 0, void 0, void 0, function* () {
             try {
-                const message = yield Message_1.default.create({
-                    sesnder: senderId,
-                    receiver: receiverId,
-                    content
-                });
-                const populatedMessage = yield Message_1.default.findById(message._id)
-                    .populate('sender', 'username')
-                    .populate('receiver', 'username');
-                io.to(receiverId).emit('receiverMesssage', populatedMessage);
-                io.to(senderId).emit('receiverMessage', populatedMessage);
+                if (!senderId || !receiverId || !content) {
+                    throw new Error('Missing required fields');
+                }
+                const message = yield Message_1.default.create({ sender: senderId, receiver: receiverId, content });
+                const populatedMessage = yield Message_1.default.findById(message._id).populate('sender', 'username').populate('receiver', 'username');
+                if (!populatedMessage) {
+                    throw new Error('Failed to populated message');
+                }
+                io.to(receiverId).emit('receiveMessage', populatedMessage);
+                io.to(senderId).emit('receiveMessage', populatedMessage);
             }
             catch (err) {
-                console.error("Error sending message: ", err);
+                console.error("Error sending message: ", err.message);
+                socket.emit('messageError', {
+                    error: "Failed to send message",
+                    details: err.message
+                });
             }
         }));
-        socket.on('disconnect'), () => {
-            console.log('Client disconnected');
-        };
+        socket.on('disconnect', () => {
+            console.log(`Client ${socket.userId || socket.id} disconnected`);
+        });
     });
 };

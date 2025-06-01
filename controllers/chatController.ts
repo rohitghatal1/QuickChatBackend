@@ -3,21 +3,23 @@ import User from "../models/User";
 
 export const getMessages = async (req:any, res:any) => {
     try{
-        const {user_id} = req.params;
-        const currentUserId = req.user._id;
+        const { userId } = req.params;
+        const currentUserId = req.user.id;
+        console.log("user id: ", req.user)
 
-        const message = await Message.find({
+        const messages = await Message.find({
             $or: [
-                {sender: currentUserId, receiver: user_id},
-                {sender: user_id, receiver: currentUserId},
-            ],
+                { sender: currentUserId, receiver: userId },
+                { sender: userId, receiver: currentUserId }
+            ]
         }).sort('timestamp').populate('sender receiver', 'username');
 
-        res.json(message);
+        res.json(messages);
     } catch(err:any){
         res.status(500).json({message: err.message});
     }
 }
+
 
 export const getUsers = async (req:any, res:any) =>{
     try{
