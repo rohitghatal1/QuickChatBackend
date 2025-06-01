@@ -13,6 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Message_1 = __importDefault(require("../models/Message"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const User_1 = __importDefault(require("../models/User"));
 exports.default = (io) => {
     io.on('connection', (socket) => {
         console.log('New client connected');
@@ -25,12 +27,22 @@ exports.default = (io) => {
             socket.userId = userId;
             console.log(`User ${userId} joined their room`);
         });
-        socket.on('sendMessage', (senderId, receiverId, content) => __awaiter(void 0, void 0, void 0, function* () {
+        socket.on('sendMessage', (data) => __awaiter(void 0, void 0, void 0, function* () {
             try {
-                if (!senderId || !receiverId || !content) {
+                const { token, receiverId, content } = data;
+                if (!token || !receiverId || !content) {
                     throw new Error('Missing required fields');
                 }
-                const message = yield Message_1.default.create({ sender: senderId, receiver: receiverId, content });
+                const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+                const senderId = decoded.id;
+                const sender = yield User_1.default.findById(senderId);
+                if (!sender)
+                    throw new Error('Sender not found');
+                const message = yield Message_1.default.create({
+                    sender: senderId,
+                    receiver: receiverId,
+                    content
+                });
                 const populatedMessage = yield Message_1.default.findById(message._id).populate('sender', 'username').populate('receiver', 'username');
                 if (!populatedMessage) {
                     throw new Error('Failed to populated message');
