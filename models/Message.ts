@@ -1,6 +1,5 @@
 import mongoose, {Document, Schema} from "mongoose";
 import {encrypt, decrypt} from '../utils/encryption';
-import { timeStamp } from "console";
 
 interface IMessage extends Document{
     sender: mongoose.Types.ObjectId;

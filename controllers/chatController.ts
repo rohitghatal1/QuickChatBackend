@@ -20,6 +20,17 @@ export const getMessages = async (req:any, res:any) => {
     }
 }
 
+export const sendMessage = async (req:any, res:any) => {
+    try{
+        const {receiverId} = req.params;
+        const currentUserId = req.user.id;
+
+
+    } catch(err:any){
+        res.status(500).json({message: err.message})
+    }
+}
+
 
 export const getUsers = async (req:any, res:any) =>{
     try{
