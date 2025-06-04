@@ -22,11 +22,27 @@ export const getMessages = async (req:any, res:any) => {
 
 export const sendMessage = async (req:any, res:any) => {
     try{
-        const {receiverId} = req.params;
-        const currentUserId = req.user.id;
+        const {receiverId, content} = req.body;
+        const senderId = req.user.id;
 
+        if(!receiverId || !content){
+            return res.status(400).json({message: "Missing required fields"});
+        }
+
+        const message = await Message.create({
+            sender: senderId,
+            receiver: receiverId,
+            content
+        })
+
+        const populatedMessage = await Message.findById(message.id)
+        .populate('sender', 'username')
+        .populate('receiver', 'username')
+
+        res.json(populatedMessage)
 
     } catch(err:any){
+        console.error("Error sending  message:", err.message);
         res.status(500).json({message: err.message})
     }
 }
