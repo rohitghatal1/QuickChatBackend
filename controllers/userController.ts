@@ -5,12 +5,13 @@ export const getUsers = async (req:any, res:any) => {
         const users = await User.find();
         res.status(200).json(users);
     } catch (err:any) {
-        res.status(500).json({message: "Server Error"}, err)
+        res.status(500).json({ statsus:"failed", message: "Server Error"}, err)
     }
 }
 
 export const getUserById = async (req:any, res:any) => {
     const userId = req.params.id
+
     try{
         const user = await User.findById(userId);
         if(!user){
@@ -20,7 +21,7 @@ export const getUserById = async (req:any, res:any) => {
         res.status(200).json(user);
 
     } catch(err:any){
-        res.status(500).json({message: "Server Error"}, err)
+        res.status(500).json({status:"failed", message: "Server Error"}, err)
     }
 }
 
@@ -28,7 +29,7 @@ export const changePassword = async (req:any, res:any) => {
     try{
 
     } catch(err:any){
-        res.status(500).json({message: "Server Error"})
+        res.status(500).json({status: "failed", message: "Server Error"})
     }
 }
 
@@ -36,6 +37,6 @@ export const uppdateProfile = async(req:any, res:any) => {
     try{
 
     } catch(err:any){
-        res.status(500).json({message: "Server Error"})
+        res.status(500).json({status: "failed", message: "Server Error"})
     }
 }
