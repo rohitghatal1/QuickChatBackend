@@ -54,6 +54,20 @@ export const changePassword = async (req:any, res:any) => {
 
 export const uppdateProfile = async(req:any, res:any) => {
     try{
+        const userId = req.user.id;
+        const {name, email, number} = req.body;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {name, email, number},
+            {new: true, runValidators: true}
+        );
+
+        if(!updatedUser){
+            return res.status(404).json({status: 'failed', message: 'User nor found'});
+        }
+
+        res.status(200).json({status: 'success', message: 'Profile updated successfullly'})
 
     } catch(err:any){
         res.status(500).json({status: "failed", message: "Server Error"})
