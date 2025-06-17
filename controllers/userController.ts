@@ -1,14 +1,20 @@
 import User from "../models/User";
 import bcrypt from "bcryptjs"
 
-export const getUsers = async (req:any, res:any) => {
-    try{
-        const users = await User.find();
-        res.status(200).json(users);
-    } catch (err:any) {
-        res.status(500).json({ statsus:"failed", message: "Server Error"}, err)
-    }
-}
+export const getUsers = async (req: any, res: any) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err: any) {
+    console.error("Error fetching users:", err.message);
+    res.status(500).json({
+      status: "failed",
+      message: "Server Error",
+      error: err.message,
+    });
+  }
+};
+
 
 export const getUserById = async (req:any, res:any) => {
     const userId = req.params.id

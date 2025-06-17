@@ -12,15 +12,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserById = exports.getUsers = void 0;
+exports.uppdateProfile = exports.changePassword = exports.getUserById = exports.getUsers = void 0;
 const User_1 = __importDefault(require("../models/User"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield User_1.default.find();
         res.status(200).json(users);
     }
     catch (err) {
-        res.status(500).json({ message: "Server Error" }, err);
+        console.error("Error fetching users:", err.message);
+        res.status(500).json({
+            status: "failed",
+            message: "Server Error",
+            error: err.message,
+        });
     }
 });
 exports.getUsers = getUsers;
@@ -34,7 +40,44 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         res.status(200).json(user);
     }
     catch (err) {
-        res.status(500).json({ message: "Server Errro" }, err);
+        res.status(500).json({ status: "failed", message: "Server Error" }, err);
     }
 });
 exports.getUserById = getUserById;
+const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.user.id;
+        const user = yield User_1.default.findById(userId);
+        if (!user) {
+            return res.status(404).json({ status: 'failed', message: 'User not found' });
+        }
+        const isMatch = yield bcryptjs_1.default.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ status: 'failed', message: 'Current password is incorrect' });
+        }
+        const hashedPassword = yield bcryptjs_1.default.hash(newPassword, 10);
+        user.password = hashedPassword;
+        yield user.save();
+        res.status(200).json({ status: "success", message: 'Password changed successfully' });
+    }
+    catch (err) {
+        res.status(500).json({ status: "failed", message: "Server Error" });
+    }
+});
+exports.changePassword = changePassword;
+const uppdateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.user.id;
+        const { name, email, number } = req.body;
+        const updatedUser = yield User_1.default.findByIdAndUpdate(userId, { name, email, number }, { new: true, runValidators: true });
+        if (!updatedUser) {
+            return res.status(404).json({ status: 'failed', message: 'User nor found' });
+        }
+        res.status(200).json({ status: 'success', message: 'Profile updated successfullly' });
+    }
+    catch (err) {
+        res.status(500).json({ status: "failed", message: "Server Error" });
+    }
+});
+exports.uppdateProfile = uppdateProfile;

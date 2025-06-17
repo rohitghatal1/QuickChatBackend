@@ -39,18 +39,18 @@ const MessageSchema = new mongoose_1.Schema({
     sender: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     receiver: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, select: false },
-    encryptedContent: { type: String, required: true },
+    // encryptedContent: {type: String, required: true},
     timeStamp: { type: Date, default: Date.now },
     read: { type: Boolean, default: false }
 });
-// encryption before saving
-MessageSchema.pre('save', function (next) {
-    if (this.isModified('content')) {
-        this.encryptedContent = (0, encryption_1.encrypt)(this.content);
-        this.content = "";
-    }
-    next();
-});
+// MessageSchema.pre<IMessage>('save', function (next) {
+//   console.log('Pre-save hook triggered, content:', this.content);
+//   if (this.isModified('content') && this.content) {
+//     this.encryptedContent = encrypt(this.content);
+//     this.content = undefined;
+//   }
+//   next();
+// });
 MessageSchema.post('find', function (docs) {
     docs.forEach((doc) => {
         if (doc.encryptedContent) {

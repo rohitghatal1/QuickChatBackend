@@ -8,4 +8,6 @@ const userController_1 = require("../controllers/userController");
 const router = express_1.default.Router();
 router.get("/getUsers", userController_1.getUsers);
 router.get("/getUsers/:id", userController_1.getUserById);
+router.patch('/user/changePassword', userController_1.changePassword);
+router.patch('/user/updatedProfiile', userController_1.uppdateProfile);
 exports.default = router;
