@@ -20,6 +20,19 @@ export const getMessages = async (req:any, res:any) => {
     }
 }
 
+export const getMyMessages = async (req:any, res:any) => {
+    try{
+        const chats = await Message.find();
+        if(!chats){
+            res.status(404).json({satus: "failed", message: "No chats found"});
+        }
+
+        res.status(200).json(chats);
+    } catch (err:any){
+        console.log("Failed to get chats: ", err)
+    }
+}
+
 export const sendMessage = async (req:any, res:any) => {
     try{
         const {receiverId, content} = req.body;

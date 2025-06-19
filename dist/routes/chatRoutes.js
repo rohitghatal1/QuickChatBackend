@@ -9,5 +9,6 @@ const router = express_1.default.Router();
 const chatController = require('../controllers/chatController');
 router.get('/user', chatController.getUsers);
 router.get('/messages/:userId', authMiddleware_1.verifyToken, chatController.getMessages);
+router.get('/message/getMyMessages', authMiddleware_1.verifyToken, chatController.getMyMessages);
 router.post("/sendMessage", authMiddleware_1.verifyToken, chatController.sendMessage);
 exports.default = router;

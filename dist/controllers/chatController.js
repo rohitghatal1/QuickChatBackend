@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUsers = exports.sendMessage = exports.getMessages = void 0;
+exports.getUsers = exports.sendMessage = exports.getMyMessages = exports.getMessages = void 0;
 const Message_1 = __importDefault(require("../models/Message"));
 const User_1 = __importDefault(require("../models/User"));
 const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -33,6 +33,19 @@ const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getMessages = getMessages;
+const getMyMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const chats = yield Message_1.default.find();
+        if (!chats) {
+            res.status(404).json({ satus: "failed", message: "No chats found" });
+        }
+        res.status(200).json(chats);
+    }
+    catch (err) {
+        console.log("Failed to get chats: ", err);
+    }
+});
+exports.getMyMessages = getMyMessages;
 const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { receiverId, content } = req.body;
