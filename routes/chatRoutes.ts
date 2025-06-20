@@ -5,6 +5,7 @@ const chatController = require('../controllers/chatController');
 
 router.get('/user', chatController.getUsers);
 router.get('/messages/:userId', verifyToken, chatController.getMessages);
+router.post('/chat/getOrCreateRoom', verifyToken, chatController.getOrCreateRoom);
 router.get('/message/getMyMessages', verifyToken, chatController.getMyMessages)
 router.post("/sendMessage", verifyToken, chatController.sendMessage)
 

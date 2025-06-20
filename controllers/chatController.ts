@@ -2,6 +2,28 @@ import ChatRoom from "../models/ChatRoom";
 import Message from "../models/Message";
 import User from "../models/User";
 
+export const getOrCreateRoom = async (req:any, res:any) => {
+    try{
+        const userId = req.user.id;
+        const {receiverId} = req.body;
+
+        let room = await ChatRoom.findOne({
+            isGroup: false,
+            participants: {$all: [userId, receiverId], $size: 2},
+        });
+
+        if(!room){
+            room = await ChatRoom.create({
+                isGroup: false,
+                participants: [userId, receiverId],
+            });
+        }
+
+        res.json(room);
+    } catch(err:any){
+        res.status(500).json({status: "failed", message: "Failed to get or create room", error: err.message})
+    }
+}
 export const getMessages = async (req:any, res:any) => {
     try{
         const { userId } = req.params;
