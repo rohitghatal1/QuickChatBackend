@@ -13,9 +13,9 @@ interface IMessage extends Document{
 const MessageSchema: Schema = new Schema ({
     sender: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     receiver: {type: Schema.Types.ObjectId, ref:'User', required: true},
-    content: { type: String, select: false},
+    content: { type: String, required: true},
     // encryptedContent: {type: String, required: true},
-    timeStamp: {type: Date, default: Date.now},
+    timestamp: {type: Date, default: Date.now},
     read: {type: Boolean, default: false}
 });
 
@@ -31,7 +31,7 @@ const MessageSchema: Schema = new Schema ({
 MessageSchema.post<IMessage>('find', function(docs:any){
     docs.forEach((doc:any) => {
         if(doc.encryptedContent){
-            doc.content = decrypt(doc.encryptedContent)
+            doc.content = decrypt(doc.content)
         }
     });
 });

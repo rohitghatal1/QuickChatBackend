@@ -20,18 +20,23 @@ export const getMessages = async (req:any, res:any) => {
     }
 }
 
-export const getMyMessages = async (req:any, res:any) => {
-    try{
-        const chats = await Message.find();
-        if(!chats){
-            res.status(404).json({satus: "failed", message: "No chats found"});
-        }
+export const getMyMessages = async (req: any, res: any) => {
+  try {
+    const chats = await Message.find()
+      .populate("sender", "username")
+      .populate("receiver", "username");
 
-        res.status(200).json(chats);
-    } catch (err:any){
-        console.log("Failed to get chats: ", err)
+    if (chats.length === 0) {
+      return res.status(404).json({ status: "failed", message: "No chats found" });
     }
-}
+
+    return res.status(200).json(chats);
+  } catch (err: any) {
+    console.log("Failed to get chats: ", err);
+    return res.status(500).json({ status: "error", message: "Internal Server Error" });
+  }
+};
+
 
 export const sendMessage = async (req:any, res:any) => {
     try{
