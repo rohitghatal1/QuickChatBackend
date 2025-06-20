@@ -15,6 +15,14 @@ export const getUsers = async (req: any, res: any) => {
   }
 };
 
+export const getCurrentUser = async (req:any, res:any) => {
+    try{
+        const user = req.user;
+        res.status(200).json(user);
+    } catch(err:any){
+        res.status(500).json({status: 'failed', message: 'Failed to fecth user info'});
+    }
+}
 
 export const getUserById = async (req:any, res:any) => {
     const userId = req.params.id

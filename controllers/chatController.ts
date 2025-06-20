@@ -24,6 +24,54 @@ export const getOrCreateRoom = async (req:any, res:any) => {
         res.status(500).json({status: "failed", message: "Failed to get or create room", error: err.message})
     }
 }
+
+export const getMyChatRooms = async (req: any, res: any) => {
+    try {
+        const userId = req.user.id;
+
+        const chatRooms = await ChatRoom.find({
+            participants: userId
+        })
+        .populate({
+            path: 'participants',
+            select: 'username name email' 
+        })
+        .populate({
+            path: 'lastMessage',
+            populate: {
+                path: 'sender',
+                select: 'username'
+            }
+        })
+        .sort({ updatedAt: -1 });
+
+        res.status(200).json(chatRooms);
+    } catch (err: any) {
+        console.error('Error fetching chat rooms: ', err.message);
+        res.status(500).json({ 
+            status: 'failed', 
+            message: 'Failed to fetch chat rooms', 
+            error: err.message 
+        });
+    }
+};
+
+export const getRoomMessages = async (req:any, res:any) => {
+    try{
+        const {roomId} = req.params;
+
+        const messages = await Message.find({room: roomId})
+        .sort({createdAt: -1})
+        .populate('sender', 'username name email')
+        .populate('receiver', 'username name email');
+
+        res.status(200).json(messages);
+    } catch(err:any){
+        console.error('Error fetching messages: ', err.message);
+        res.status(500).json({status: 'failed', message: 'Server error'});
+    }
+};
+
 export const getMessages = async (req:any, res:any) => {
     try{
         const { userId } = req.params;
