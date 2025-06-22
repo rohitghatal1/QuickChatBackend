@@ -70,11 +70,11 @@ export const changePassword = async (req:any, res:any) => {
 export const updateProfile = async(req:any, res:any) => {
     try{
         const userId = req.user.id;
-        const {name, email, number} = req.body;
+        const {name, email} = req.body;
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
-            {name, email, number},
+            {name, email},
             {new: true, runValidators: true}
         );
 
