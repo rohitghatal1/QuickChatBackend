@@ -56,8 +56,9 @@ export const changePassword = async (req:any, res:any) => {
             return res.status(400).json({status: 'failed', message: 'Current password is incorrect'}) 
         }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedPassword;
-        await user.save();
+        await User.findOneAndUpdate({_id: userId}, {password: hashedPassword});
+        // user.password = hashedPassword;
+        // await user.save();
 
         res.status(200).json({status: "success", message: 'Password changed successfully'})
 
@@ -66,7 +67,7 @@ export const changePassword = async (req:any, res:any) => {
     }
 }
 
-export const uppdateProfile = async(req:any, res:any) => {
+export const updateProfile = async(req:any, res:any) => {
     try{
         const userId = req.user.id;
         const {name, email, number} = req.body;
