@@ -1,6 +1,4 @@
 import mongoose, { Document, mongo, Schema } from "mongoose";
-import { encrypt, decrypt } from "../utils/encryption";
-import { ref } from "process";
 
 interface IMessage extends Document {
   chatRoom: mongoose.Types.ObjectId;
