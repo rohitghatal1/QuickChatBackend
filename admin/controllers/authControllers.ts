@@ -3,7 +3,7 @@ import { generateToken } from "../../utils/jwt";
 import AdminModel from "../models/AdminModel";
 import bcrypt from "bcryptjs";
 
-export const registerAdmin = async (req:any, res:any) => {
+export const adminRegister = async (req:any, res:any) => {
     try{
         const {name, number, email, password} = req.body;
 
