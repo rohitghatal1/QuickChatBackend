@@ -5,9 +5,12 @@ import dotenv from "dotenv";
 const cors = require('cors');
 const http = require('http');
 const socketio = require('socket.io');
+
 import authRoutes from "./routes/authRoutes";
 import chatRoutes from "./routes/chatRoutes";
 import userRoutes from "./routes/userRoutes";
+
+import adminAuthRoutes from "./admin/routes/authRoutes";
 
 dotenv.config()
 const app = express();
@@ -24,9 +27,14 @@ connectDB();
 app.get("/", (req:any, res:any) => {
   res.send("QuickChat backend is running!");
 });
+
+// user routes 
 app.use('/api/auth', authRoutes)
 app.use('/api/chat', chatRoutes)
 app.use('/api/users/', userRoutes)
+
+// admin routes 
+app.use('/api/admin', adminAuthRoutes)
 
 const io = socketio(server, {
     cors: {
