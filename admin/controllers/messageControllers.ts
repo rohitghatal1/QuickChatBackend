@@ -13,3 +13,11 @@ export const getMessages = async (req:any, res:any) => {
         res.status(500).json({status: "Failed", message: "Serve error"})
     }
 }
+
+export const deleteMessage = async (req:any, res:any) => {
+    try{
+
+    } catch (err:any){
+        res.status(404).json({status: "failed", message: "Server Error"})
+    }
+}
