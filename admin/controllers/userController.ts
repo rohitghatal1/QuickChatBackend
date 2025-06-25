@@ -11,6 +11,14 @@ export const getAllUsers = async (req:any, res:any) => {
         res.staus(200).json(users)
     } catch (err){
         console.log("Error fetching users: ", err)
-        res.status(400).json({status: "failed", message: "Server error!"})
+        res.status(500).json({status: "failed", message: "Server error!"})
+    }
+}
+
+export const deleteUser = async (req:any, res:any) => {
+    try{
+
+    } catch(err:any){
+        res.status(500).json({status: "failed", message: "Server error!"});
     }
 }

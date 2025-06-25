@@ -1,6 +1,7 @@
 import express from "express";
-import { getAllUsers } from "../controllers/userController";
+import { deleteUser, getAllUsers } from "../controllers/userController";
 
 const router = express.Router();
 
 router.get("/getUsers", getAllUsers);
+router.delete("/deleteUser/:userId", deleteUser)
