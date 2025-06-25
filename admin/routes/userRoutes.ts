@@ -4,4 +4,3 @@ import { getAllUsers } from "../controllers/userController";
 const router = express.Router();
 
 router.get("/getUsers", getAllUsers);
-router.get("/getMessages", );
