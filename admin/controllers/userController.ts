@@ -17,8 +17,20 @@ export const getAllUsers = async (req:any, res:any) => {
 
 export const deleteUser = async (req:any, res:any) => {
     try{
+        const {userId} = req.body;
 
+        if(!userId) {
+            return res.status(400).json({status: 'failed', message: "User Id required"});
+        }
+
+        User.findByIdAndDelete(userId);
+
+        res.json({
+            status: "success",
+            message: "user deleted successfully"
+        })
     } catch(err:any){
         res.status(500).json({status: "failed", message: "Server error!"});
     }
 }
+
