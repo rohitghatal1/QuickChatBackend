@@ -24,16 +24,23 @@ export const deleteUser = async (req: any, res: any) => {
     if (!userId) {
       return res
         .status(400)
-        .json({ status: "failed", message: "User Id required" });
+        .json({ status: "failed", message: "User ID required" });
     }
 
-    User.findByIdAndDelete(userId);
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res
+        .status(404)
+        .json({ status: "failed", message: "User not found" });
+    }
 
     res.json({
       status: "success",
-      message: "user deleted successfully",
+      message: "User deleted successfully",
     });
-  } catch (err: any) {
+  } catch (err) {
+    console.error("Delete error:", err);
     res.status(500).json({ status: "failed", message: "Server error!" });
   }
 };
