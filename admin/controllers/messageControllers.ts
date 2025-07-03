@@ -18,20 +18,28 @@ export const getMessages = async (req: any, res: any) => {
 
 export const deleteMessage = async (req: any, res: any) => {
   try {
-    const { messaageId } = req.body;
+    const { messageId } = req.body;
 
-    if (!messaageId) {
+    if (!messageId) {
       return res
         .status(400)
-        .json({ status: "failed", message: "User Id required" });
+        .json({ status: "failed", message: "Message ID required" });
     }
 
-    Message.findByIdAndDelete(messaageId);
+    const deletedMessage = await Message.findByIdAndDelete(messageId);
+
+    if (!deletedMessage) {
+      return res
+        .status(404)
+        .json({ status: "failed", message: "Message not found" });
+    }
 
     res.json({
       status: "success",
+      message: "Message deleted successfully",
     });
-  } catch (err: any) {
-    res.status(404).json({ status: "failed", message: "Server Error" });
+  } catch (err) {
+    console.error("Delete message error:", err);
+    res.status(500).json({ status: "failed", message: "Server Error" });
   }
 };
