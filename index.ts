@@ -10,6 +10,8 @@ import authRoutes from "./routes/authRoutes";
 import chatRoutes from "./routes/chatRoutes";
 import userRoutes from "./routes/userRoutes";
 
+import groupRoutes from "./routes/groupRoutes";
+
 import adminAuthRoutes from "./admin/routes/authRoutes";
 
 dotenv.config();
@@ -35,7 +37,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/users/", userRoutes);
 
 //group routes
-app.use("/api/groups/", createGroup);
+app.use("/api/groups/", groupRoutes);
 
 // admin routes
 app.use("/api/admin", adminAuthRoutes);
