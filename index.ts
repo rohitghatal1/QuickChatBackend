@@ -21,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 
 import connectDB from "./config/database";
+import { createGroup } from "./controllers/groupController";
 connectDB();
 
 //Routes
@@ -32,6 +33,9 @@ app.get("/", (req: any, res: any) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/users/", userRoutes);
+
+//group routes
+app.use("/api/groups/", createGroup);
 
 // admin routes
 app.use("/api/admin", adminAuthRoutes);
