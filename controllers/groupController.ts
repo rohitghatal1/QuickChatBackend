@@ -1,8 +1,9 @@
+import { populate } from "dotenv";
 import ChatRoom from "../models/ChatRoom";
 import Message from "../models/Message";
 
 export const createGroup = async (req: any, res: any) => {
-  const currentUserId = req.params.id;
+  const currentUserId = req.user.id;
   const { groupName, participantIds } = req.body;
 
   if (!groupName || !participantIds || participantIds.length < 2) {
@@ -41,9 +42,11 @@ export const createGroup = async (req: any, res: any) => {
 };
 
 export const sendGroupMessage = async (req: any, res: any) => {
-  const { chatRoomId, senderId, content } = req.body;
+  const { roomId, content } = req.body;
 
-  if (!chatRoomId || !senderId || !content) {
+  const senderId = req.user?.id || req.body.senderId;
+
+  if (!roomId || !senderId || !content) {
     return res.status(400).json({
       message: "Missing requried fileds",
     });
@@ -51,16 +54,29 @@ export const sendGroupMessage = async (req: any, res: any) => {
 
   try {
     const message = await Message.create({
-      chatRoom: chatRoomId,
+      chatRoom: roomId,
       sender: senderId,
-      content: content,
+      content,
     });
 
-    await ChatRoom.findByIdAndUpdate(chatRoomId, { lastMessage: message._id });
+    await ChatRoom.findByIdAndUpdate(roomId, {
+      lastMessage: message._id,
+    });
 
-    res
-      .status(201)
-      .jason({ status: "success", message: "Message sent successfully" });
+    const popolatedMessage = await Message.findOne({ _id: message._id })
+      .populate("sender", "username")
+      .populate({
+        path: "chatroom",
+        populate: {
+          path: "lastMessage",
+          populate: { path: "sender", select: "username" },
+        },
+      });
+
+    return res.status(201).json({
+      status: "success",
+      message: popolatedMessage,
+    });
   } catch (err: any) {
     res.status(500).json({ status: "failed", message: err });
   }
