@@ -34,28 +34,10 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const encryption_1 = require("../utils/encryption");
 const MessageSchema = new mongoose_1.Schema({
-    sender: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
-    receiver: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
-    content: { type: String, select: false },
-    // encryptedContent: {type: String, required: true},
-    timeStamp: { type: Date, default: Date.now },
-    read: { type: Boolean, default: false }
-});
-// MessageSchema.pre<IMessage>('save', function (next) {
-//   console.log('Pre-save hook triggered, content:', this.content);
-//   if (this.isModified('content') && this.content) {
-//     this.encryptedContent = encrypt(this.content);
-//     this.content = undefined;
-//   }
-//   next();
-// });
-MessageSchema.post('find', function (docs) {
-    docs.forEach((doc) => {
-        if (doc.encryptedContent) {
-            doc.content = (0, encryption_1.decrypt)(doc.encryptedContent);
-        }
-    });
-});
-exports.default = mongoose_1.default.model('Message', MessageSchema);
+    chatRoom: { type: mongoose_1.Schema.Types.ObjectId, ref: "ChatRoom", required: true },
+    sender: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
+    content: { type: String, required: true },
+    readBy: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
+}, { timestamps: true });
+exports.default = mongoose_1.default.model("Message", MessageSchema);
