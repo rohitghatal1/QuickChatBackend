@@ -3,6 +3,7 @@ import ChatRoom from "../models/ChatRoom";
 import Message from "../models/Message";
 import User from "../models/User";
 import { populate } from "dotenv";
+import mongoose from "mongoose";
 
 export const getOrCreateRoom = async (req: any, res: any) => {
   try {
@@ -66,77 +67,15 @@ export const getRoomMessages = async (req: any, res: any) => {
   try {
     const { roomId } = req.params;
 
-    console.log("room messges fetched with id: ", roomId);
     const messages = await Message.find({ chatRoom: roomId })
       .sort({ createdAt: -1 })
-      .populate({
-        path: "sender",
-        select: "username name email",
-      })
-      .lean();
+      .populate("sender", "username name email")
+      .populate("receiver", "username name email");
 
-    const formattedMessage = messages.map((msg: any) => ({
-      _id: msg._id,
-      chatRoom: msg.chatRoom,
-      sender: {
-        id: msg.sender._id,
-        username: msg.sender.username,
-        name: msg.sender.name,
-        email: msg.sender.email,
-      },
-      content: msg.content,
-      readBy: msg.readBy || [],
-      createdAt: msg.createdAt,
-      updatedAt: msg.updatedAt,
-    }));
-
-    res.status(200).json(formattedMessage);
-    console.log("response sent with: ", messages);
+    res.status(200).json(messages);
   } catch (err: any) {
     console.error("Error fetching messages: ", err.message);
     res.status(500).json({ status: "failed", message: "Server error" });
-  }
-};
-
-export const getMessages = async (req: any, res: any) => {
-  try {
-    const { userId } = req.params;
-    const currentUserId = req.user.id;
-    console.log("user id: ", req.user);
-
-    const messages = await Message.find({
-      $or: [
-        { sender: currentUserId, receiver: userId },
-        { sender: userId, receiver: currentUserId },
-      ],
-    })
-      .sort("timestamp")
-      .populate("sender receiver", "username");
-
-    res.json(messages);
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const getMyMessages = async (req: any, res: any) => {
-  try {
-    const chats = await Message.find()
-      .populate("sender", "username")
-      .populate("receiver", "username");
-
-    if (chats.length === 0) {
-      return res
-        .status(404)
-        .json({ status: "failed", message: "No chats found" });
-    }
-
-    return res.status(200).json(chats);
-  } catch (err: any) {
-    console.log("Failed to get chats: ", err);
-    return res
-      .status(500)
-      .json({ status: "error", message: "Internal Server Error" });
   }
 };
 
@@ -149,15 +88,22 @@ export const sendMessage = async (req: any, res: any) => {
       .status(400)
       .json({ status: "failed", message: "Missing fields" });
   }
-  console.log(
-    "send message called with room id and content: ",
-    roomId,
-    content
+
+  const chatRoom = await ChatRoom.findById(roomId);
+  if (!chatRoom) {
+    return res
+      .status(404)
+      .json({ status: "failed", message: "Chat room not found" });
+  }
+
+  const receiverId = chatRoom.participants.find(
+    (id: mongoose.Types.ObjectId) => id.toString() !== senderId
   );
 
   const message = await Message.create({
     chatRoom: roomId,
     sender: senderId,
+    receiver: receiverId,
     content,
   });
 
@@ -165,6 +111,7 @@ export const sendMessage = async (req: any, res: any) => {
 
   const populatedMessage = await Message.find({ _id: message._id })
     .populate("sender", "username")
+    .populate("receiver", "username") // Populate receiver
     .populate({
       path: "chatRoom",
       populate: {
@@ -176,13 +123,44 @@ export const sendMessage = async (req: any, res: any) => {
   res.json(populatedMessage[0]);
 };
 
-export const getUsers = async (req: any, res: any) => {
-  try {
-    const users = await User.find({ _id: { $ne: req.user._id } }).select(
-      "-password"
-    );
-    res.json(users);
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
-  }
-};
+// export const getMessages = async (req: any, res: any) => {
+//   try {
+//     const { userId } = req.params;
+//     const currentUserId = req.user.id;
+//     console.log("user id: ", req.user);
+
+//     const messages = await Message.find({
+//       $or: [
+//         { sender: currentUserId, receiver: userId },
+//         { sender: userId, receiver: currentUserId },
+//       ],
+//     })
+//       .sort("timestamp")
+//       .populate("sender receiver", "username");
+
+//     res.json(messages);
+//   } catch (err: any) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// export const getMyMessages = async (req: any, res: any) => {
+//   try {
+//     const chats = await Message.find()
+//       .populate("sender", "username")
+//       .populate("receiver", "username");
+
+//     if (chats.length === 0) {
+//       return res
+//         .status(404)
+//         .json({ status: "failed", message: "No chats found" });
+//     }
+
+//     return res.status(200).json(chats);
+//   } catch (err: any) {
+//     console.log("Failed to get chats: ", err);
+//     return res
+//       .status(500)
+//       .json({ status: "error", message: "Internal Server Error" });
+//   }
+// };
