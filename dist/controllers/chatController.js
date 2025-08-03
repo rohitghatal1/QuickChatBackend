@@ -52,10 +52,16 @@ const getMyChatRooms = (req, res) => __awaiter(void 0, void 0, void 0, function*
         })
             .populate({
             path: "lastMessage",
-            populate: {
-                path: "sender",
-                select: "username",
-            },
+            populate: [
+                {
+                    path: "sender",
+                    select: "username name email",
+                },
+                {
+                    path: "receiver",
+                    select: "username name email",
+                },
+            ],
         })
             .sort({ updatedAt: -1 });
         res.status(200).json(chatRooms);

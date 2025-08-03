@@ -45,10 +45,16 @@ export const getMyChatRooms = async (req: any, res: any) => {
       })
       .populate({
         path: "lastMessage",
-        populate: {
-          path: "sender",
-          select: "username",
-        },
+        populate: [
+          {
+            path: "sender",
+            select: "username name email",
+          },
+          {
+            path: "receiver",
+            select: "username name email",
+          },
+        ],
       })
       .sort({ updatedAt: -1 });
 
