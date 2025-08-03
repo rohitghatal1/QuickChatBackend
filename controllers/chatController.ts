@@ -85,48 +85,93 @@ export const getRoomMessages = async (req: any, res: any) => {
   }
 };
 
+import admin from "../managers/firebase"; // adjust path if needed
+
 export const sendMessage = async (req: any, res: any) => {
-  const { roomId, content } = req.body;
-  const senderId = req.user.id;
+  try {
+    const { roomId, content } = req.body;
+    const senderId = req.user.id;
 
-  if (!roomId || !content) {
-    return res
-      .status(400)
-      .json({ status: "failed", message: "Missing fields" });
-  }
+    if (!roomId || !content) {
+      return res
+        .status(400)
+        .json({ status: "failed", message: "Missing fields" });
+    }
 
-  const chatRoom = await ChatRoom.findById(roomId);
-  if (!chatRoom) {
-    return res
-      .status(404)
-      .json({ status: "failed", message: "Chat room not found" });
-  }
+    const chatRoom = await ChatRoom.findById(roomId);
+    if (!chatRoom) {
+      return res
+        .status(404)
+        .json({ status: "failed", message: "Chat room not found" });
+    }
 
-  const receiverId = chatRoom.participants.find(
-    (id: mongoose.Types.ObjectId) => id.toString() !== senderId
-  );
+    const receiverId = chatRoom.participants.find(
+      (id: mongoose.Types.ObjectId) => id.toString() !== senderId
+    );
 
-  const message = await Message.create({
-    chatRoom: roomId,
-    sender: senderId,
-    receiver: receiverId,
-    content,
-  });
+    if (!receiverId) {
+      return res.status(400).json({
+        status: "failed",
+        message: "Receiver not found in chat room",
+      });
+    }
 
-  await ChatRoom.findByIdAndUpdate(roomId, { lastMessage: message._id });
+    console.log("reached here");
 
-  const populatedMessage = await Message.find({ _id: message._id })
-    .populate("sender", "username")
-    .populate("receiver", "username") // Populate receiver
-    .populate({
-      path: "chatRoom",
-      populate: {
-        path: "lastMessage",
-        populate: { path: "sender", select: "username" },
-      },
+    const senderUser = await User.findById(senderId);
+    const topic = receiverId.toString(); // Use receiverId as topic
+    const title = `New message from ${senderUser?.username || "Someone"}`;
+    const body = content;
+    // const image = ""; // or provide image URL if any
+
+    console.log("topic ", topic);
+    console.log("sender id ", senderUser);
+
+    const pushMessage: admin.messaging.Message = {
+      topic: topic,
+      notification: { title, body },
+      // data: {
+      //   title,
+      //   topic,
+      //   body,
+      //   image,
+      //   // attachment,
+      // },
+    };
+
+    try {
+      await admin.messaging().send(pushMessage);
+    } catch (pushErr) {
+      console.error("Push Notification Error:", pushErr);
+    }
+
+    const message = await Message.create({
+      chatRoom: roomId,
+      sender: senderId,
+      receiver: receiverId,
+      content,
     });
 
-  res.json(populatedMessage[0]);
+    await ChatRoom.findByIdAndUpdate(roomId, { lastMessage: message._id });
+
+    const populatedMessage = await Message.find({ _id: message._id })
+      .populate("sender", "username")
+      .populate("receiver", "username")
+      .populate({
+        path: "chatRoom",
+        populate: {
+          path: "lastMessage",
+          populate: { path: "sender", select: "username" },
+        },
+      });
+
+    res.json(populatedMessage[0]);
+  } catch (err: any) {
+    console.error("Send Message Error:", err.message);
+    res
+      .status(500)
+      .json({ status: "failed", message: "Server error", error: err.message });
+  }
 };
 
 // export const getMessages = async (req: any, res: any) => {

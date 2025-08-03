@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMessage = exports.getRoomMessages = exports.getMyChatRooms = exports.getOrCreateRoom = void 0;
 const ChatRoom_1 = __importDefault(require("../models/ChatRoom"));
 const Message_1 = __importDefault(require("../models/Message"));
+const User_1 = __importDefault(require("../models/User"));
 const getOrCreateRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
@@ -91,39 +92,79 @@ const getRoomMessages = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getRoomMessages = getRoomMessages;
+const firebase_1 = __importDefault(require("../managers/firebase")); // adjust path if needed
 const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { roomId, content } = req.body;
-    const senderId = req.user.id;
-    if (!roomId || !content) {
-        return res
-            .status(400)
-            .json({ status: "failed", message: "Missing fields" });
+    try {
+        const { roomId, content } = req.body;
+        const senderId = req.user.id;
+        if (!roomId || !content) {
+            return res
+                .status(400)
+                .json({ status: "failed", message: "Missing fields" });
+        }
+        const chatRoom = yield ChatRoom_1.default.findById(roomId);
+        if (!chatRoom) {
+            return res
+                .status(404)
+                .json({ status: "failed", message: "Chat room not found" });
+        }
+        const receiverId = chatRoom.participants.find((id) => id.toString() !== senderId);
+        if (!receiverId) {
+            return res.status(400).json({
+                status: "failed",
+                message: "Receiver not found in chat room",
+            });
+        }
+        console.log("reached here");
+        const senderUser = yield User_1.default.findById(senderId);
+        const topic = receiverId.toString(); // Use receiverId as topic
+        const title = `New message from ${(senderUser === null || senderUser === void 0 ? void 0 : senderUser.username) || "Someone"}`;
+        const body = content;
+        // const image = ""; // or provide image URL if any
+        console.log("topic ", topic);
+        console.log("sender id ", senderUser);
+        const pushMessage = {
+            topic: topic,
+            notification: { title, body },
+            // data: {
+            //   title,
+            //   topic,
+            //   body,
+            //   image,
+            //   // attachment,
+            // },
+        };
+        try {
+            yield firebase_1.default.messaging().send(pushMessage);
+        }
+        catch (pushErr) {
+            console.error("Push Notification Error:", pushErr);
+        }
+        const message = yield Message_1.default.create({
+            chatRoom: roomId,
+            sender: senderId,
+            receiver: receiverId,
+            content,
+        });
+        yield ChatRoom_1.default.findByIdAndUpdate(roomId, { lastMessage: message._id });
+        const populatedMessage = yield Message_1.default.find({ _id: message._id })
+            .populate("sender", "username")
+            .populate("receiver", "username")
+            .populate({
+            path: "chatRoom",
+            populate: {
+                path: "lastMessage",
+                populate: { path: "sender", select: "username" },
+            },
+        });
+        res.json(populatedMessage[0]);
     }
-    const chatRoom = yield ChatRoom_1.default.findById(roomId);
-    if (!chatRoom) {
-        return res
-            .status(404)
-            .json({ status: "failed", message: "Chat room not found" });
+    catch (err) {
+        console.error("Send Message Error:", err.message);
+        res
+            .status(500)
+            .json({ status: "failed", message: "Server error", error: err.message });
     }
-    const receiverId = chatRoom.participants.find((id) => id.toString() !== senderId);
-    const message = yield Message_1.default.create({
-        chatRoom: roomId,
-        sender: senderId,
-        receiver: receiverId,
-        content,
-    });
-    yield ChatRoom_1.default.findByIdAndUpdate(roomId, { lastMessage: message._id });
-    const populatedMessage = yield Message_1.default.find({ _id: message._id })
-        .populate("sender", "username")
-        .populate("receiver", "username") // Populate receiver
-        .populate({
-        path: "chatRoom",
-        populate: {
-            path: "lastMessage",
-            populate: { path: "sender", select: "username" },
-        },
-    });
-    res.json(populatedMessage[0]);
 });
 exports.sendMessage = sendMessage;
 // export const getMessages = async (req: any, res: any) => {
