@@ -37,6 +37,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const MessageSchema = new mongoose_1.Schema({
     chatRoom: { type: mongoose_1.Schema.Types.ObjectId, ref: "ChatRoom", required: true },
     sender: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
+    receiver: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true }, // New field
     content: { type: String, required: true },
     readBy: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
 }, { timestamps: true });

@@ -43,12 +43,11 @@ export const createGroup = async (req: any, res: any) => {
 
 export const sendGroupMessage = async (req: any, res: any) => {
   const { roomId, content } = req.body;
-
   const senderId = req.user?.id || req.body.senderId;
 
   if (!roomId || !senderId || !content) {
     return res.status(400).json({
-      message: "Missing requried fileds",
+      message: "Missing required fields",
     });
   }
 
@@ -63,21 +62,15 @@ export const sendGroupMessage = async (req: any, res: any) => {
       lastMessage: message._id,
     });
 
-    const popolatedMessage = await Message.findOne({ _id: message._id })
-      .populate("sender", "username")
-      .populate({
-        path: "chatroom",
-        populate: {
-          path: "lastMessage",
-          populate: { path: "sender", select: "username" },
-        },
-      });
+    const populatedMessage = await Message.findOne({
+      _id: message._id,
+    }).populate("sender", "username name email");
 
-    return res.status(201).json({
-      status: "success",
-      message: popolatedMessage,
-    });
+    return res.status(201).json(populatedMessage);
   } catch (err: any) {
-    res.status(500).json({ status: "failed", message: err });
+    console.error(err);
+    res
+      .status(500)
+      .json({ status: "failed", message: "Internal server error" });
   }
 };
