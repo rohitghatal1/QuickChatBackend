@@ -2,9 +2,12 @@ import Message from "../../models/Message";
 
 export const getMessages = async (req: any, res: any) => {
   try {
-    const messages = await Message.find();
+    const messages = await Message.find()
+      .populate("sender", "name email") // or _id, name, etc. as needed
+      .populate("receiver", "name email")
+      .sort({ createdAt: -1 }); // optional: newest first
 
-    if (!messages) {
+    if (!messages || messages.length === 0) {
       return res
         .status(404)
         .json({ status: "failed", message: "No messages found" });
@@ -12,13 +15,14 @@ export const getMessages = async (req: any, res: any) => {
 
     return res.status(200).json(messages);
   } catch (err: any) {
-    res.status(500).json({ status: "Failed", message: "Serve error" });
+    console.error("Error fetching messages:", err);
+    res.status(500).json({ status: "Failed", message: "Server error" });
   }
 };
 
 export const deleteMessage = async (req: any, res: any) => {
   try {
-    const { messageId } = req.body;
+    const { messageId } = req.params;
 
     if (!messageId) {
       return res

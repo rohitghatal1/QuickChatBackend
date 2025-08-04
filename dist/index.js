@@ -34,6 +34,8 @@ const ChatRoom_1 = __importDefault(require("./models/ChatRoom"));
 const Message_1 = __importDefault(require("./models/Message"));
 const User_1 = __importDefault(require("./models/User"));
 const firebase_1 = __importDefault(require("./managers/firebase"));
+const userRoutes_2 = __importDefault(require("./admin/routes/userRoutes"));
+const messageRoutes_1 = __importDefault(require("./admin/routes/messageRoutes"));
 (0, database_1.default)();
 //Routes
 app.get("/", (req, res) => {
@@ -47,6 +49,8 @@ app.use("/api/users/", userRoutes_1.default);
 app.use("/api/groups/", groupRoutes_1.default);
 // admin routes
 app.use("/api/admin", authRoutes_2.default);
+app.use("/api/admin/user", userRoutes_2.default);
+app.use("/api/admin/message", messageRoutes_1.default);
 const io = socketio(server, {
     cors: {
         origin: "*",

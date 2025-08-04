@@ -1,11 +1,10 @@
-import express from 'express';
-import { verifyToken } from '../middleware/authMiddleware';
-import { adminLogin, adminRegister } from '../controllers/authControllers';
+import express from "express";
+import { verifyToken } from "../middleware/authMiddleware";
+import { adminLogin, adminRegister } from "../controllers/authControllers";
 
 const router = express.Router();
 
-router.post("/register", verifyToken, adminRegister)
-router.post("/login", verifyToken, adminLogin );
+router.post("/register", adminRegister);
+router.post("/login", adminLogin);
 
-
-export default router
+export default router;

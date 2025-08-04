@@ -29,6 +29,9 @@ import mongoose from "mongoose";
 import adminAddAnnouncement from "./controllers/amindddd";
 import User from "./models/User";
 import admin from "./managers/firebase";
+
+import adminUserRoutes from "./admin/routes/userRoutes";
+import adminMessageRoutes from "./admin/routes/messageRoutes";
 connectDB();
 
 //Routes
@@ -46,6 +49,8 @@ app.use("/api/groups/", groupRoutes);
 
 // admin routes
 app.use("/api/admin", adminAuthRoutes);
+app.use("/api/admin/user", adminUserRoutes);
+app.use("/api/admin/message", adminMessageRoutes);
 
 const io = socketio(server, {
   cors: {

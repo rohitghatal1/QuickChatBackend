@@ -2,7 +2,6 @@ import express from "express";
 import {
   changePassword,
   getCurrentUser,
-  getUserById,
   getUsers,
   updateProfile,
 } from "../controllers/userController";
@@ -12,8 +11,7 @@ const router = express.Router();
 
 router.get("/getUsers", getUsers);
 router.get("/auth/me", verifyToken, getCurrentUser);
-router.get("/getUsers/:id", getUserById);
-router.patch("/changePassword", changePassword);
-router.patch("/updateProfile", updateProfile);
+router.patch("/changePassword", verifyToken, changePassword);
+router.patch("/updateProfile", verifyToken, updateProfile);
 
 export default router;

@@ -10,7 +10,7 @@ export const getAllUsers = async (req: any, res: any) => {
         .json({ status: "failed", message: "No users found" });
     }
 
-    res.staus(200).json(users);
+    res.status(200).json(users);
   } catch (err) {
     console.log("Error fetching users: ", err);
     res.status(500).json({ status: "failed", message: "Server error!" });
@@ -19,7 +19,7 @@ export const getAllUsers = async (req: any, res: any) => {
 
 export const deleteUser = async (req: any, res: any) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.params;
 
     if (!userId) {
       return res
